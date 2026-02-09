@@ -2,28 +2,37 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\TaskRequest;
+use App\Http\Resources\TaskResource;
 use App\Models\Task;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class TaskController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function userTaskId(Request $request)
     {
         if ($request->query('include') === 'user') {
-            return Task::with('user')->get();
+            $tasks = Task::with('user')->get();
+            return TaskResource::collection($tasks);
         }
 
         return response()->json(Task::all());
     }
-
-    public function user($id)
+    public function index()
     {
-        $task = Task::findOrFail($id);
-        return response()->json($task->user);
+        $tasks = Task::all();
+        return TaskResource::collection($tasks);
     }
+
+    // public function user($id)
+    // {
+    //     $task = Task::findOrFail($id);
+    //     return TaskResource::collection($task);
+    // }
 
     /**
      * Show the form for creating a new resource.
@@ -36,9 +45,17 @@ class TaskController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(TaskRequest $request)
     {
-        //
+        $validated = $request->validated();
+        $validated['user_id'] = $request->user()->id;
+
+        $task = Task::create($validated);
+
+        return response()->json([
+            'message' => 'Task created successfully',
+            'data' => new TaskResource($task)
+        ], Response::HTTP_CREATED);
     }
 
     /**
@@ -60,9 +77,21 @@ class TaskController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Task $task)
+    public function update(TaskRequest $request, Task $task)
     {
         //
+        if ($task->user_id !== $request->user()->id) {
+            return response()->json([
+                'message' => 'Not allowed'
+            ]);
+        }
+        $validated = $request->validated();
+        $task->update($validated);
+
+        return response()->json([
+            'message' => 'Task Updated Successfully',
+            'data' => new TaskResource($task)
+        ]);
     }
 
     /**
@@ -70,6 +99,10 @@ class TaskController extends Controller
      */
     public function destroy(Task $task)
     {
-        //
+        $task->delete();
+
+        return response()->json([
+            'message' => 'Task deleted successfully'
+        ]);
     }
 }

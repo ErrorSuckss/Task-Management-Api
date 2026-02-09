@@ -21,6 +21,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/users', [UserController::class, 'index']);
     Route::get('/users/{id}/user', [UserController::class, 'tasks']);
 
-    Route::get('/tasks', [TaskController::class, 'index']);
-    Route::get('/tasks/{id}/user', [TaskController::class, 'user']);
+    // Route::get('/tasks', [TaskController::class, 'index']);
+    Route::get('/tasks/{id}/user', [TaskController::class, 'userTaskId']);
+
+    Route::apiResource('tasks', TaskController::class);
 });
