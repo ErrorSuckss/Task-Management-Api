@@ -19,9 +19,8 @@ class UserController extends Controller
         return response()->json(["yeah" => User::all()]);
     }
 
-    public function tasks($id)
+    public function tasks(User $user)
     {
-        $user = User::findOrFail($id);
         return response()->json($user->tasks);
     }
 

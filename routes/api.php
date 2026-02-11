@@ -19,10 +19,11 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::get('/users', [UserController::class, 'index']);
-    Route::get('/users/{id}/user', [UserController::class, 'tasks']);
+    Route::get('/users/{user}/user', [UserController::class, 'tasks']);
 
     // Route::get('/tasks', [TaskController::class, 'index']);
-    Route::get('/tasks/{id}/user', [TaskController::class, 'userTaskId']);
+    Route::get('/tasks/user', [TaskController::class, 'usersTask']);
+    Route::get('/tasks/{task}/user', [TaskController::class, 'user']);
 
     Route::apiResource('tasks', TaskController::class);
 });

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\TaskRequest;
 use App\Http\Resources\TaskResource;
+use App\Http\Resources\UserResource;
 use App\Models\Task;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -13,14 +14,14 @@ class TaskController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function userTaskId(Request $request)
+    public function usersTask(Request $request)
     {
         if ($request->query('include') === 'user') {
             $tasks = Task::with('user')->get();
             return TaskResource::collection($tasks);
         }
 
-        return response()->json(Task::all());
+        return response()->json(Task::all());   
     }
     public function index()
     {
@@ -28,11 +29,16 @@ class TaskController extends Controller
         return TaskResource::collection($tasks);
     }
 
-    // public function user($id)
-    // {
-    //     $task = Task::findOrFail($id);
-    //     return TaskResource::collection($task);
-    // }
+    public function user(Task $task)
+    {
+        $task->load('user');
+
+        if (!$task->user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        return new UserResource($task->user);
+    }
 
     /**
      * Show the form for creating a new resource.
