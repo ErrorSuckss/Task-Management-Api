@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 
 class RegisterRequest extends FormRequest
@@ -30,6 +31,17 @@ class RegisterRequest extends FormRequest
                 'email',
                 'max:255',
                 'unique:users,email',
+            ],
+            'role' => [
+                'nullable',
+                'string',
+                'in:admin,team_leader,user'
+            ],
+
+            'team_leader_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('users', 'id')->where(fn($query) => $query->where('role', 'team_leader'))
             ],
 
             'password' => [

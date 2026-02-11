@@ -18,6 +18,10 @@ class UserResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'email' => $this->email,
+            'role' => $this->role,
+            'team_leader_id' => $this->team_leader_id,
+            'team_leader' => new UserResource($this->whenLoaded('teamLeader')),
+            'tasks' => TaskResource::collection($this->whenLoaded('tasks'))
         ];
     }
 }

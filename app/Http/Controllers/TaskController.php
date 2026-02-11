@@ -6,6 +6,8 @@ use App\Http\Requests\TaskRequest;
 use App\Http\Resources\TaskResource;
 use App\Http\Resources\UserResource;
 use App\Models\Task;
+use App\Services\TaskService;
+use App\Services\UserService;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -14,19 +16,18 @@ class TaskController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function usersTask(Request $request)
+    public function arrayOfTasksWithUser(Request $request)
     {
         if ($request->query('include') === 'user') {
             $tasks = Task::with('user')->get();
             return TaskResource::collection($tasks);
         }
 
-        return response()->json(Task::all());   
+        return response()->json(Task::all());
     }
-    public function index()
+    public function index(TaskService $taskService)
     {
-        $tasks = Task::all();
-        return TaskResource::collection($tasks);
+        return TaskResource::collection($taskService->getAccessibleTasks());
     }
 
     public function user(Task $task)

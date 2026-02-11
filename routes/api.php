@@ -18,11 +18,12 @@ Route::middleware('auth:sanctum')->group(function () {
         return response()->json($request->user());
     });
 
-    Route::get('/users', [UserController::class, 'index']);
+    Route::get('/users/task', [UserController::class, 'arrayOfUsersWithTasks']);
     Route::get('/users/{user}/user', [UserController::class, 'tasks']);
+    Route::apiResource('users', UserController::class);
 
     // Route::get('/tasks', [TaskController::class, 'index']);
-    Route::get('/tasks/user', [TaskController::class, 'usersTask']);
+    Route::get('/tasks/user', [TaskController::class, 'arrayOfTasksWithUser']);
     Route::get('/tasks/{task}/user', [TaskController::class, 'user']);
 
     Route::apiResource('tasks', TaskController::class);

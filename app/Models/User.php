@@ -22,7 +22,13 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'role',
         'password',
+        'team_leader_id'
+    ];
+
+    protected $attributes = [
+        'role' => 'user',
     ];
 
     /**
@@ -34,6 +40,22 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isTeamLeader(): bool
+    {
+        return $this->role === 'team_leader';
+    }
+
+    public function isUser(): bool
+    {
+        return $this->role === 'user';
+    }
+
 
     /**
      * Get the attributes that should be cast.
@@ -52,5 +74,15 @@ class User extends Authenticatable
     public function tasks()
     {
         return $this->hasMany(Task::class);
+    }
+
+    public function teamLeader()
+    {
+        return $this->belongsTo(User::class, 'team_leader_id');
+    }
+
+    public function teamMembers()
+    {
+        return $this->hasMany(User::class, 'team_leader_id');
     }
 }
