@@ -8,6 +8,7 @@ use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Services\UserService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -32,8 +33,8 @@ class UserController extends Controller
      */
     public function index(UserService $userService)
     {
-
-        return UserResource::collection($userService->getAccessibleUsers());
+        $user = Auth::user();
+        return UserResource::collection($userService->getAccessibleUsers($user));
     }
 
     /**
@@ -50,7 +51,7 @@ class UserController extends Controller
     public function store(RegisterRequest $request, UserService $userService)
     {
         $validated = $request->validated();
-        $user = $userService->addUser($validated);
+        $user = $userService->addUser($request->user(), $validated);
         return new UserResource($user);
     }
 
@@ -77,7 +78,7 @@ class UserController extends Controller
     {
         //
         $validated = $request->validated();
-        $user = $userService->updateUser($user, $validated);
+        $user = $userService->updateUser($request->user(), $user, $validated);
         return new UserResource($user);
     }
 

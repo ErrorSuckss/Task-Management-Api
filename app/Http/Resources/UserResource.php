@@ -21,6 +21,7 @@ class UserResource extends JsonResource
             'role' => $this->role,
             'team_leader_id' => $this->team_leader_id,
             'team_leader' => new UserResource($this->whenLoaded('teamLeader')),
+            'team_members' => UserResource::collection($this->whenLoaded('teamMembers')),
             'tasks' => TaskResource::collection($this->whenLoaded('tasks'))
         ];
     }
