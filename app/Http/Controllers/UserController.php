@@ -31,11 +31,23 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(UserService $userService)
+    public function index(Request $request)
     {
-        $user = Auth::user();
-        return UserResource::collection($userService->getAccessibleUsers($user));
+        $authUser = $request->user();
+        $query = User::visibleTo($authUser);
+
+        if ($request->query('include') === 'team') {
+            $query->with('team');
+        }
+
+        return UserResource::collection($query->get());
     }
+    
+    // public function index(UserService $userService)
+    // {
+    //     $user = Auth::user();
+    //     return UserResource::collection($userService->getAccessibleUsers($user));
+    // }
 
     /**
      * Show the form for creating a new resource.

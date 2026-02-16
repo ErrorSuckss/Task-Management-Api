@@ -8,6 +8,9 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\Task;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class User extends Authenticatable
 {
@@ -24,7 +27,6 @@ class User extends Authenticatable
         'email',
         'role',
         'password',
-        'team_leader_id'
     ];
 
     protected $attributes = [
@@ -56,6 +58,18 @@ class User extends Authenticatable
         return $this->role === 'user';
     }
 
+    public function scopeVisibleTo($query, $user)
+    {
+        if ($user->role === 'admin') {
+            return $query;
+        } elseif ($user->role === 'team_leader') {
+            return $query->where('team_id', $user->team_id);
+        } else {
+            return $query->where('id', $user->id);
+        }
+    }
+
+
 
     /**
      * Get the attributes that should be cast.
@@ -70,19 +84,18 @@ class User extends Authenticatable
         ];
     }
 
+    public function team(): BelongsTo
+    {
+        return $this->belongsTo(Team::class);
+    }
 
-    public function tasks()
+    public function tasks(): HasMany
     {
         return $this->hasMany(Task::class);
     }
 
-    public function teamLeader()
+    public function leadingTeam(): HasOne
     {
-        return $this->belongsTo(User::class, 'team_leader_id');
-    }
-
-    public function teamMembers()
-    {
-        return $this->hasMany(User::class, 'team_leader_id');
+        return $this->hasOne(Team::class, 'team_leader_id');
     }
 }
