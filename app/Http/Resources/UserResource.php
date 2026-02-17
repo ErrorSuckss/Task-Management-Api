@@ -17,6 +17,7 @@ class UserResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'team_id' => $this->team_id,
             'email' => $this->email,
             'role' => $this->role,
             'team' => new TeamResource($this->whenLoaded('team')),

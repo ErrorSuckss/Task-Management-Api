@@ -6,6 +6,7 @@ use App\Http\Requests\StoreTeamRequest;
 use App\Http\Requests\UpdateTeamRequest;
 use App\Http\Resources\TeamResource;
 use App\Models\Team;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -34,9 +35,12 @@ class TeamController extends Controller
         //
 
         $validated = $request->validated();
+        $leader = User::findOrFail($validated['team_leader_id']);
 
         $team = Team::create($validated);
-        $team->with('leader')->get();
+        $leader->team_id = $team->id;
+        $leader->save();
+        $team->load('leader');
 
         return response()->json([
             'message' => 'Team created successfully.',
@@ -56,7 +60,7 @@ class TeamController extends Controller
         return response()->json([
             'message' => 'Team updated successfully.',
             'data' => new TeamResource($team)
-        ]);
+        ], Response::HTTP_OK);
     }
 
     /**

@@ -36,6 +36,11 @@ class TeamMemberController extends Controller
                 'message' => 'Cannot assign a team leader as a member'
             ], 422);
         }
+        if ($user->role === 'admin') {
+            return response()->json([
+                'message' => 'Cannot assign a admin as a member'
+            ], 422);
+        }
 
         $user->team_id = $team->id;
         $user->save();

@@ -25,7 +25,7 @@ class StoreTeamRequest extends FormRequest
         return [
             'name' => 'required|max:100|string',
             'team_leader_id' => [
-                'nullable',
+                'required',
                 'integer',
                 Rule::exists('users', 'id')->where(function ($query) {
                     $query->where('role', 'team_leader');
