@@ -24,6 +24,7 @@ class StoreTeamRequest extends FormRequest
     {
         return [
             'name' => 'required|max:100|string',
+            'profile_pic' => ['nullable', 'image', 'mimes:png,jpg'],
             'team_leader_id' => [
                 'required',
                 'integer',

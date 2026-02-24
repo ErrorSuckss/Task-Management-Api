@@ -26,6 +26,8 @@ class RegisterRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
 
+            'profile_pic' => ['nullable', 'image', 'mimes:png,jpg'],
+
             'email' => [
                 'required',
                 'email',

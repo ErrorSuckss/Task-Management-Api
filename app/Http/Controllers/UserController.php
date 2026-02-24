@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\UsersExport;
 use App\Http\Requests\RegisterRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Http\Resources\UserResource;
@@ -9,6 +10,7 @@ use App\Models\User;
 use App\Services\UserService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
 
 class UserController extends Controller
 {
@@ -94,7 +96,7 @@ class UserController extends Controller
     {
         //
         $validated = $request->validated();
-        $user = $userService->updateUser($request->user(), $user, $validated);
+        $user = $userService->updateUser($request->user(), $user, $validated, $request);
         return new UserResource($user);
     }
 

@@ -34,6 +34,9 @@ class UpdateUserRequest extends FormRequest
                     ->ignore($this->route('user')->id),
             ],
 
+
+            'profile_pic' => ['sometimes', 'nullable', 'image', 'mimes:png,jpg'],
+
             'role' => [
                 'sometimes',
                 'string',

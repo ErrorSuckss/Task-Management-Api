@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -43,17 +44,19 @@ class AuthController extends Controller
 
     public function register(RegisterRequest $request)
     {
-        $user = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
+        $validated = $request->validated();
+        if ($request->hasFile('profile_pic')) {
+            $path = $request->file('profile_pic')
+                ->store('users', 'public');
+            $validated['profile_pic'] = $path;
+        }
+        $user = User::create($validated);
 
         $token = $user->createToken('api-token')->plainTextToken;
 
         return response()->json([
             'token' => $token,
-            'user'  => $user,
+            'user'  => new UserResource($user),
         ], 201);
     }
 }

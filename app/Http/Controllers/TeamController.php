@@ -2,13 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\TeamsExport;
 use App\Http\Requests\StoreTeamRequest;
 use App\Http\Requests\UpdateTeamRequest;
 use App\Http\Resources\TeamResource;
+use App\Imports\TeamsImport;
 use App\Models\Team;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
 
 class TeamController extends Controller
 {
@@ -36,7 +40,10 @@ class TeamController extends Controller
 
         $validated = $request->validated();
         $leader = User::findOrFail($validated['team_leader_id']);
-
+        if ($request->hasFile('profile_pic')) {
+            $path = $request->file('profile_pic')->store('teams', 'public');
+            $validated['profile_pic'] = $path;
+        }
         $team = Team::create($validated);
         $leader->team_id = $team->id;
         $leader->save();
@@ -55,6 +62,12 @@ class TeamController extends Controller
     {
         //
         $validated = $request->validated();
+
+        if ($request->hasFile('profile_pic')) {
+            Storage::disk('public')->delete($team->profile_pic);
+            $path = $request->file('profile_pic')->store('teams', 'public');
+            $validated['profile_pic'] = $path;
+        }
         $team->update($validated);
 
         return response()->json([
@@ -74,5 +87,21 @@ class TeamController extends Controller
             'message' => 'Team deleted successfully.',
             'data' => new TeamResource($team)
         ]);
+    }
+
+    public function export()
+    {
+        return Excel::download(new TeamsExport, 'team.xlsx');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => ['required', 'mimes:xlsx, xls']
+        ]);
+
+        Excel::import(new TeamsImport, $request->file('file'));
+
+        return redirect()->back()->with('success', 'Teams imported successfully!');
     }
 }

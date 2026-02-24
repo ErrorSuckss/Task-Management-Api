@@ -7,6 +7,7 @@ use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Facades\Storage;
 
 class UserService
 {
@@ -48,11 +49,12 @@ class UserService
         return $user;
     }
 
-    public function updateUser(User $authUser, User $user, array $data)
+    public function updateUser(User $authUser, User $user, array $data, $request)
     {
         if (isset($data['password'])) {
             $data['password'] = bcrypt($data['password']);
         }
+
 
         if ($authUser->isAdmin()) {
             if (isset($data['role']) && !in_array($data['role'], ['admin', 'team_leader', 'user'])) {
@@ -60,6 +62,10 @@ class UserService
             }
             if (isset($data['role']) && $data['role'] === 'team_leader') {
                 $data["team_leader_id"] = null;
+            }
+            if ($request->hasFile('profile_pic')) {
+                $user = $this->updateProfilePic($user, $user->file['profile_pic']);
+                $data['profile_pic'] = $user->profile_pic;
             }
 
             $user->update($data);
@@ -72,12 +78,21 @@ class UserService
                 throw new \Exception('You can only update your own team members.');
             }
 
+            if ($request->hasFile('profile_pic')) {
+                $user = $this->updateProfilePic($user, $user->file['profile_pic']);
+                $data['profile_pic'] = $user->profile_pic;
+            }
+
             unset($data['role'], $data['team_leader_id']);
 
             $user->update($data);
         } else {
             if ($authUser->id !== $user->id) {
                 throw new \Exception('You can only update your own account.');
+            }
+            if ($request->hasFile('profile_pic')) {
+                $user = $this->updateProfilePic($user, $request->file('profile_pic'));
+                $data['profile_pic'] = $user->profile_pic;
             }
 
             unset($data['role'], $data['team_leader_id']);
@@ -92,6 +107,24 @@ class UserService
             $user->load('teamMembers');
         }
 
+        return $user;
+    }
+
+
+    public function updateProfilePic(User $user, $uploadedFile)
+    {
+        if (!$uploadedFile) {
+            return $user;
+        }
+
+        if ($user->profile_pic) {
+            Storage::disk('public')->delete($user->profile_pic);
+        }
+
+
+        $path = $uploadedFile->store('users', 'public');
+        $user->profile_pic = $path;
+        $user->save();
         return $user;
     }
 }
